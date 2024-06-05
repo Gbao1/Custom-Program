@@ -1,5 +1,6 @@
 ﻿//MainWindow
 
+using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -22,7 +23,9 @@ namespace ChessUI
         private readonly Image[,] pieceImages = new Image[8, 8];
         private readonly Rectangle[,] highlights = new Rectangle[8, 8]; //highlights the legal moves
         private readonly Dictionary<Positions, Move> moveStore = new Dictionary<Positions, Move>(); //store all the legal moves of the piece
-            
+        private static string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+        private static string SaveFilePath = System.IO.Path.Combine(desktopPath, "saved_game.txt");
+
         private GameState gameState;
         private Positions selected = null; //store the selected position
         private Positions promoFrom;
@@ -36,10 +39,93 @@ namespace ChessUI
         public MainWindow()
         {
             InitializeComponent();
+
+            MainMenu mainMenuControl = new MainMenu();
+
+            // Check if the save file exists
+            bool saveFileExists = File.Exists(SaveFilePath);
+
+            if (saveFileExists)
+            {
+                mainMenuControl.btnLoadGame.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                mainMenuControl.btnLoadGame.Visibility= Visibility.Collapsed;
+            }
+
+            // Add the MainMenuUserControl to the MainMenuContainer
+            MainMenuContainer.Content = mainMenuControl;
+
+            // Wire up the button events to your existing event handlers
+            mainMenuControl.btnNewGame.Click += btnNewGame_Click;
+            mainMenuControl.btnLoadGame.Click += btnLoadGame_Click;
+            mainMenuControl.btnQuitGame.Click += btnQuitGame_Click;
+
+        }
+
+        private void btnNewGame_Click(object sender, RoutedEventArgs e)
+        {
             InitializedBoard();
 
             gameState = new GameState(Player.White, Board.SetUp());
             Draw(gameState.Board);
+
+            MainMenuContainer.Content = null; // Clear the MainMenuContainer
+            BoardGrid.Visibility = Visibility.Visible; // Show the chessboard grid
+        }
+
+        private void btnLoadGame_Click(object sender, RoutedEventArgs e)
+        {
+            InitializedBoard();
+
+            if (File.Exists(SaveFilePath))
+            {
+                Board loadedBoard = Board.LoadedBoard(SaveFilePath);
+                Player currentTurn = GetCurrentTurn(loadedBoard);
+                gameState = new GameState(currentTurn, loadedBoard);
+                Draw(gameState.Board);
+                MainMenuContainer.Content = null;
+                BoardGrid.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                MessageBox.Show("Save file not found.");
+            }
+        }
+
+        private Player GetCurrentTurn(Board board)
+        {
+            // Read the state string from the file
+            string stateString;
+
+            using (StreamReader reader = new StreamReader(SaveFilePath))
+            {
+                stateString = reader.ReadLine();
+            }
+
+            // Extract the character representing the current player's turn
+            char turnChar = stateString.Split(' ')[1][0];
+
+            // Determine the current player's turn based on the extracted character
+            Player currentTurn;
+            if (turnChar == 'w')
+            {
+                currentTurn = Player.White;
+            }
+            else
+            {
+                currentTurn = Player.Black;
+            }
+
+            return currentTurn;
+        }
+
+
+
+        private void btnQuitGame_Click(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Shutdown();
         }
 
         private void InitializedBoard()
@@ -62,9 +148,9 @@ namespace ChessUI
 
         private void Draw(Board board)
         {
-            for (int a = 0;a < 8; a ++)
+            for (int a = 0; a < 8; a++)
             {
-                for(int b = 0;b < 8; b++)
+                for (int b = 0; b < 8; b++)
                 {
                     Piece piece = board[a, b];
                     pieceImages[a, b].Source = Images.GetImage(piece);
@@ -208,8 +294,17 @@ namespace ChessUI
                 MenuBox.Content = null;
                 GameRestart();
             }
-            else
+            else if (option == Options.Quit)
             {
+                Application.Current.Shutdown();
+            }
+            else if (option == Options.Continue)
+            {
+                MenuBox.Content = null;
+            }
+            else if (option == Options.Save)
+            {
+                gameState.Save(SaveFilePath);
                 Application.Current.Shutdown();
             }
         }
@@ -228,6 +323,21 @@ namespace ChessUI
             moveStore.Clear();
             gameState = new GameState(Player.White, Board.SetUp());
             Draw(gameState.Board);
+        }
+
+        private void Window_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (!IsMenuOn() && e.Key == Key.Escape)
+            {
+                ShowPauseMenu();
+            }
+        }
+
+        private void ShowPauseMenu()
+        {
+            PauseMenu pauseMenu = new PauseMenu();
+            MenuBox.Content = pauseMenu;
+            pauseMenu.OptionsChanged += OnOptionsChanged;
         }
     }
 }

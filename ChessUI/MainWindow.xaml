@@ -8,9 +8,18 @@
         Title="Chess Game" Width="600" SizeToContent="Height"
         Icon="Images/icon.ico"
         WindowStartupLocation="CenterScreen"
-        Background="Black">
-    <Viewbox>
+        Background="Black"
+        KeyDown="Window_KeyDown">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        
+        <ContentControl x:Name="MainMenuContainer"/>
+        
         <Grid x:Name="BoardGrid"
+              Visibility="Collapsed"
               Width="600"
               Height="600"
               MouseDown="BoardGrid_MouseDown">
@@ -31,6 +40,6 @@
 
             <ContentControl x:Name="MenuBox"/>
         </Grid>
-    </Viewbox>    
+    </Grid>    
     
 </Window>

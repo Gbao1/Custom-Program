@@ -14,10 +14,14 @@ namespace ChessRules
         public Player CurrentTurn { get; private set; } //mutable in class but read-only outside
         public Result Result { get; private set; } = null; //mutable in class but read-only outside
 
+        private string stateString;
+
         public GameState(Player player,  Board board)
         {
             CurrentTurn = player;
             Board = board;
+
+            stateString = new StateString(CurrentTurn, board).ToString();
         }
 
         public IEnumerable<Move> LegalMoves(Positions pos)
@@ -49,6 +53,7 @@ namespace ChessRules
             Board.SetPawnSkippedSquares(CurrentTurn, null);
             move.Excecute(Board);
             CurrentTurn = CurrentTurn.Opponent(); //change turn
+            StateStringUpdate();
             CheckEnded();
         }
 
@@ -93,5 +98,29 @@ namespace ChessRules
         {
             return Result != null;
         }
+
+        private void StateStringUpdate()
+        {
+            stateString = new StateString(CurrentTurn, Board).ToString();
+        }
+
+        public void Save(string filename)
+        {
+            StreamWriter writer = new StreamWriter(filename);
+
+            try
+            {
+                writer.WriteLine(stateString);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error saving file: " + e.Message);
+            }
+            finally
+            {
+                writer.Close();
+            }
+        }
+
     }
 }

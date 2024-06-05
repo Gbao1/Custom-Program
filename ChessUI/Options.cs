@@ -12,6 +12,7 @@ namespace ChessUI
     {
         Restart,
         Quit,
-        Continue
+        Continue,
+        Save
     }
 }

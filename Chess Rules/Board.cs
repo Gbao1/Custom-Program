@@ -13,7 +13,7 @@ namespace ChessRules
     public class Board
     {
         private readonly Piece[,] pieces = new Piece[8, 8];
-        
+
         private readonly Dictionary<Player, Positions> pawnSkippedSquares = new Dictionary<Player, Positions>
         {
             { Player.White, null },
@@ -49,6 +49,8 @@ namespace ChessRules
             return board;
         }
 
+        
+
         private void AddInitialPieces()
         {
             //Black pieces first row
@@ -78,6 +80,80 @@ namespace ChessRules
             }
         }
 
+        public static Board LoadedBoard(string filePath)
+        {
+            string stateStringText = File.ReadAllText(filePath);
+            Board board = new Board();
+            board.LoadPieces(stateStringText);
+            return board;
+        }
+
+        private void LoadPieces(string stateString)
+        {
+            // Split the state string into its components
+            string[] parts = stateString.Split(' ');
+
+            // Load the piece positions (1st part)
+            string[] rows = stateString.Split('/');
+            for (int row = 0; row < 8; row++)
+            {
+                string rowString = rows[row];
+                int col = 0;
+                foreach (char c in rowString)
+                {
+                    if (char.IsDigit(c))
+                    {
+                        col += int.Parse(c.ToString());
+                    }
+                    else
+                    {
+                        Player color = Player.Black;
+                        if (char.IsUpper(c))
+                        {
+                            color = Player.White;
+                        }
+                        
+                        // Check if the piece has moved based on the marker "*"
+                        bool hasMoved = false;
+                        if (c == '*')
+                        {
+                            hasMoved = true;
+                        }
+
+                        PieceType pieceType = PieceFactory.GetPieceType(c);
+                        // Create the piece
+                        Piece piece = PieceFactory.CreatePiece(pieceType, color);
+
+                        // Set the "HasMoved" property of the piece
+                        if (piece != null)
+                        {
+                            if (hasMoved)
+                            {
+                                piece.HasMoved = true;
+                            }
+                        }
+
+                        // Assign the piece to the board
+                        this[row, col] = piece;
+                        col++;
+                    }
+                }
+            }
+
+            // Set the current player turn (2nd part)
+            string turn = parts[1];
+            // You might want to handle this information as needed in your application
+
+            // Set castling rights (3rd part)
+            string castlingRights = parts[2];
+            // You might want to handle this information as needed in your application
+
+            // Set en passant square (4th part)
+            string enPassantSquare = parts[3];
+            // You might want to handle this information as needed in your application
+        }
+
+
         public static bool Inside(Positions pos)
         {
             return pos.Row >= 0 && pos.Row < 8 && pos.Column >= 0 && pos.Column < 8;
@@ -95,7 +171,6 @@ namespace ChessRules
                 for (int b = 0; b < 8; b++)
                 {
                     Positions pos = new Positions(a, b);
-
                     yield return pos;
                 }
             }
@@ -113,7 +188,7 @@ namespace ChessRules
                 }
             }
         }
-        
+
         public bool InCheck(Player p)
         {
             //Get opponent pieces
@@ -138,7 +213,7 @@ namespace ChessRules
             Board copy = new Board();
 
             foreach (Positions pos in PiecesPos())
-            {   
+            {
                 //check if the piece is null or not
                 Piece piece = this[pos];
                 if (piece != null)
@@ -154,6 +229,93 @@ namespace ChessRules
             }
 
             return copy;
+        }
+
+        private bool HasKingAndRookMoved(Positions kingPos, Positions rookPos)
+        {
+            if (Empty(rookPos) || Empty(kingPos))
+            {
+                return false;
+            }
+
+            Piece king = this[kingPos];
+            Piece rook = this[rookPos];
+
+            return king.Type == PieceType.King && rook.Type == PieceType.Rook && !king.HasMoved && !rook.HasMoved;
+        }
+
+        public bool QSCastleRight(Player p)
+        {
+            switch (p)
+            {
+                case Player.White:
+                    return HasKingAndRookMoved(new Positions(7, 4), new Positions(7, 7));
+                case Player.Black:
+                    return HasKingAndRookMoved(new Positions(0, 4), new Positions(0, 7));
+                default:
+                    return false;
+            }
+        }
+
+        public bool KSCastleRight(Player p)
+        {
+            switch (p)
+            {
+                case Player.White:
+                    return HasKingAndRookMoved(new Positions(7, 4), new Positions(7, 0));
+                case Player.Black:
+                    return HasKingAndRookMoved(new Positions(0, 4), new Positions(0, 0));
+                default:
+                    return false;
+            }
+        }
+
+        //Check if there is a pawn in the position and if its legal
+        private bool HasPawn(Player p, Positions[] pawnPos, Positions skippedPos)
+        {
+            foreach (Positions pos in  pawnPos.Where(Inside))
+            {
+                Piece piece = this[pos];
+                if (piece == null || piece.Color != p || piece.Type != PieceType.Pawn)
+                {
+                    continue;
+                }
+
+                EnPassant move = new EnPassant(pos, skippedPos);
+                if (move.IsLegal(this))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        //check if you can en passant
+        public bool EnPassantRight(Player p)
+        {
+            Positions skippedPos = GetPawnSkippedSquares(p.Opponent());
+
+            if (skippedPos == null)
+            {
+                return false;
+            }
+
+            Positions[] pawnPos;
+            switch (p)
+            {
+                case Player.White:
+                    pawnPos = new Positions[] { skippedPos + Direction.DownRight, skippedPos + Direction.DownLeft };
+                    break;
+
+                case Player.Black:
+                    pawnPos = new Positions[] { skippedPos + Direction.UpRight, skippedPos + Direction.UpLeft };
+                    break;
+
+                default:
+                    return false;
+            }
+
+            return HasPawn(p, pawnPos, skippedPos);
         }
 
     }
