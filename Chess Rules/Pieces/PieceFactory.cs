@@ -4,27 +4,26 @@ public static class PieceFactory
 {
     public static PieceType GetPieceType(char c)
     {
-        char pieceChar = char.ToUpper(c);
         PieceType pieceType;
 
-        switch (pieceChar)
+        switch (char.ToLower(c))
         {
-            case 'P':
+            case 'p':
                 pieceType = PieceType.Pawn;
                 break;
-            case 'N':
+            case 'n':
                 pieceType = PieceType.Knight;
                 break;
-            case 'B':
+            case 'b':
                 pieceType = PieceType.Bishop;
                 break;
-            case 'R':
+            case 'r':
                 pieceType = PieceType.Rook;
                 break;
-            case 'Q':
+            case 'q':
                 pieceType = PieceType.Queen;
                 break;
-            case 'K':
+            case 'k':
                 pieceType = PieceType.King;
                 break;
             default:
@@ -34,25 +33,40 @@ public static class PieceFactory
         return pieceType;
     }
 
-
-    public static Piece CreatePiece(PieceType pieceType, Player color)
+    public static Piece CreatePiece(PieceType pieceType, Player color, bool hasMoved)
     {
+        Piece piece;
+
         switch (pieceType)
         {
             case PieceType.Pawn:
-                return new Pawn(color);
+                piece = new Pawn(color);
+                break;
             case PieceType.Knight:
-                return new Knight(color);
+                piece = new Knight(color);
+                break;
             case PieceType.Bishop:
-                return new Bishop(color);
+                piece = new Bishop(color);
+                break;
             case PieceType.Rook:
-                return new Rook(color);
+                piece = new Rook(color);
+                break;
             case PieceType.Queen:
-                return new Queen(color);
+                piece = new Queen(color);
+                break;
             case PieceType.King:
-                return new King(color);
+                piece = new King(color);
+                break;
             default:
                 throw new ArgumentException($"Invalid piece type: {pieceType}");
         }
+
+        if (hasMoved)
+        {
+            piece.MarkMoved();
+        }
+
+        return piece;
     }
 }
+

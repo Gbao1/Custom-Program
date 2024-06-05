@@ -33,6 +33,11 @@ namespace ChessRules
             Color = color;
         }
 
+        public override void MarkMoved()
+        {
+            HasMoved = true;
+        }
+
         private static bool HasRookMoved(Positions pos, Board board)
         {
             if (board.Empty(pos))

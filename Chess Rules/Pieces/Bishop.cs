@@ -29,6 +29,11 @@ namespace ChessRules
             Color = color;
         }
 
+        public override void MarkMoved()
+        {
+            HasMoved = true;
+        }
+
         public override Piece Copy()
         {
             Bishop copy = new Bishop(Color);

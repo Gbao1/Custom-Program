@@ -17,6 +17,8 @@ namespace ChessRules
         //Because piece don't store their positions on the board so we need current position as a parameter.
         public abstract IEnumerable<Move> GetMoves(Positions from, Board board); //piece can return all legal moves.
 
+        public abstract void MarkMoved();
+
         protected IEnumerable<Positions> MoveInDir(Positions from, Board board, Direction dir)
         {
             for (Positions pos = from + dir; Board.Inside(pos); pos += dir)

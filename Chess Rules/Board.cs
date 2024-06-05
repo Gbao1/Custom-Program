@@ -94,65 +94,39 @@ namespace ChessRules
             string[] parts = stateString.Split(' ');
 
             // Load the piece positions (1st part)
-            string[] rows = stateString.Split('/');
+            string[] rows = parts[0].Split('/');
             for (int row = 0; row < 8; row++)
             {
                 string rowString = rows[row];
                 int col = 0;
-                foreach (char c in rowString)
+                for (int i = 0; i < rowString.Length; i++)
                 {
+                    char c = rowString[i];
+
                     if (char.IsDigit(c))
                     {
                         col += int.Parse(c.ToString());
                     }
                     else
                     {
-                        Player color = Player.Black;
-                        if (char.IsUpper(c))
-                        {
-                            color = Player.White;
-                        }
-                        
-                        // Check if the piece has moved based on the marker "*"
                         bool hasMoved = false;
-                        if (c == '*')
+                        if (i + 1 < rowString.Length && rowString[i + 1] == '+')
                         {
                             hasMoved = true;
+                            i++; // Skip the '+'
                         }
 
+                        Player color = char.IsUpper(c) ? Player.White : Player.Black;
                         PieceType pieceType = PieceFactory.GetPieceType(c);
-                        // Create the piece
-                        Piece piece = PieceFactory.CreatePiece(pieceType, color);
-
-                        // Set the "HasMoved" property of the piece
-                        if (piece != null)
-                        {
-                            if (hasMoved)
-                            {
-                                piece.HasMoved = true;
-                            }
-                        }
-
+                        // Create the piece with the hasMoved flag
+                        Piece piece = PieceFactory.CreatePiece(pieceType, color, hasMoved);
                         // Assign the piece to the board
                         this[row, col] = piece;
                         col++;
                     }
                 }
             }
-
-            // Set the current player turn (2nd part)
-            string turn = parts[1];
-            // You might want to handle this information as needed in your application
-
-            // Set castling rights (3rd part)
-            string castlingRights = parts[2];
-            // You might want to handle this information as needed in your application
-
-            // Set en passant square (4th part)
-            string enPassantSquare = parts[3];
-            // You might want to handle this information as needed in your application
         }
-
 
         public static bool Inside(Positions pos)
         {
@@ -244,7 +218,7 @@ namespace ChessRules
             return king.Type == PieceType.King && rook.Type == PieceType.Rook && !king.HasMoved && !rook.HasMoved;
         }
 
-        public bool QSCastleRight(Player p)
+        public bool KSCastleRight(Player p)
         {
             switch (p)
             {
@@ -257,7 +231,7 @@ namespace ChessRules
             }
         }
 
-        public bool KSCastleRight(Player p)
+        public bool QSCastleRight(Player p)
         {
             switch (p)
             {

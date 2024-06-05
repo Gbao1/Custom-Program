@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -40,10 +41,10 @@ namespace ChessRules
             AddEnPassant(board, currentTurn);
         }
 
-        private static char PiecesChar(Piece piece)
+        private static string PiecesString(Piece piece)
         {
             char c;
-            switch(piece.Type)
+            switch (piece.Type)
             {
                 case PieceType.Pawn:
                     c = 'p';
@@ -66,14 +67,19 @@ namespace ChessRules
                 default:
                     c = ' ';
                     break;
-            };
+            }
 
             if (piece.Color == Player.White)
             {
-                return char.ToUpper(c);
+                c = char.ToUpper(c);
             }
-           
-            return c;
+
+            if (piece.HasMoved)
+            {
+                return c.ToString() + '+';
+            }
+
+            return c.ToString();
         }
 
         private void AddRow(Board board, int row)
@@ -94,7 +100,7 @@ namespace ChessRules
                     empty = 0;
                 }
 
-                sb.Append(PiecesChar(board[row, i]));
+                sb.Append(PiecesString(board[row, i]));
             }
 
             if (empty > 0)
@@ -105,7 +111,7 @@ namespace ChessRules
 
         private void AddPiecesPositions(Board board)
         {
-            for (int  row = 0; row < 8; row++)
+            for (int row = 0; row < 8; row++)
             {
                 if (row != 0)
                 {
@@ -118,14 +124,7 @@ namespace ChessRules
 
         private void AddCurrentTurn(Player currentTurn)
         {
-            if (currentTurn == Player.White)
-            {
-                sb.Append('w');
-            }
-            else if (currentTurn == Player.Black)
-            {
-                sb.Append('b');
-            }
+            sb.Append(currentTurn == Player.White ? 'w' : 'b');
         }
 
         private void AddCastling(Board board)
@@ -135,44 +134,30 @@ namespace ChessRules
             bool BKSCastle = board.KSCastleRight(Player.Black);
             bool BQSCastle = board.QSCastleRight(Player.Black);
 
-            if (!(WKSCastle && WQSCastle && BKSCastle && BQSCastle))
+            if (!(WKSCastle || WQSCastle || BKSCastle || BQSCastle))
             {
-                sb.Append('*');
+                sb.Append('-');
                 return;
             }
 
-            if (WKSCastle)
-            {
-                sb.Append('K');
-            }
-            if (WQSCastle)
-            {
-                sb.Append('Q');
-            }
-            if (BKSCastle)
-            {
-                sb.Append('k');
-            }
-            if (BQSCastle)
-            {
-                sb.Append('q');
-            }
-
+            if (WKSCastle) sb.Append('K');
+            if (WQSCastle) sb.Append('Q');
+            if (BKSCastle) sb.Append('k');
+            if (BQSCastle) sb.Append('q');
         }
 
         private void AddEnPassant(Board board, Player currentTurn)
         {
             if (!board.EnPassantRight(currentTurn))
             {
-                sb.Append('*');
+                sb.Append('-');
                 return;
             }
 
             Positions pos = board.GetPawnSkippedSquares(currentTurn.Opponent());
             char file = (char)('a' + pos.Column);
             int rank = 8 - pos.Row;
-            sb.Append(file);
-            sb.Append(rank);
+            sb.Append(file).Append(rank);
         }
 
         public override string ToString()
@@ -180,4 +165,5 @@ namespace ChessRules
             return sb.ToString();
         }
     }
+
 }

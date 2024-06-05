@@ -32,6 +32,11 @@ namespace ChessRules
             }
         }
 
+        public override void MarkMoved()
+        {
+            HasMoved = true;
+        }
+
         public override Piece Copy()
         {
             Pawn copy = new Pawn(Color);
