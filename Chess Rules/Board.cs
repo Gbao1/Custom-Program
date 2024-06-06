@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
@@ -45,55 +46,44 @@ namespace ChessRules
         public static Board SetUp()
         {
             Board board = new Board();
-            board.AddInitialPieces();
-            return board;
-        }
+            // Black pieces first row
+            board[0, 0] = PieceFactory.CreatePiece(PieceType.Rook, Player.Black, false);
+            board[0, 1] = PieceFactory.CreatePiece(PieceType.Knight, Player.Black, false);
+            board[0, 2] = PieceFactory.CreatePiece(PieceType.Bishop, Player.Black, false);
+            board[0, 3] = PieceFactory.CreatePiece(PieceType.Queen, Player.Black, false);
+            board[0, 4] = PieceFactory.CreatePiece(PieceType.King, Player.Black, false);
+            board[0, 5] = PieceFactory.CreatePiece(PieceType.Bishop, Player.Black, false);
+            board[0, 6] = PieceFactory.CreatePiece(PieceType.Knight, Player.Black, false);
+            board[0, 7] = PieceFactory.CreatePiece(PieceType.Rook, Player.Black, false);
 
-        
-
-        private void AddInitialPieces()
-        {
-            //Black pieces first row
-            this[0, 0] = new Rook(Player.Black);
-            this[0, 1] = new Knight(Player.Black);
-            this[0, 2] = new Bishop(Player.Black);
-            this[0, 3] = new Queen(Player.Black);
-            this[0, 4] = new King(Player.Black);
-            this[0, 5] = new Bishop(Player.Black);
-            this[0, 6] = new Knight(Player.Black);
-            this[0, 7] = new Rook(Player.Black);
-
-            //White pieces first row
-            this[7, 0] = new Rook(Player.White);
-            this[7, 1] = new Knight(Player.White);
-            this[7, 2] = new Bishop(Player.White);
-            this[7, 3] = new Queen(Player.White);
-            this[7, 4] = new King(Player.White);
-            this[7, 5] = new Bishop(Player.White);
-            this[7, 6] = new Knight(Player.White);
-            this[7, 7] = new Rook(Player.White);
+            // White pieces first row
+            board[7, 0] = PieceFactory.CreatePiece(PieceType.Rook, Player.White, false);
+            board[7, 1] = PieceFactory.CreatePiece(PieceType.Knight, Player.White, false);
+            board[7, 2] = PieceFactory.CreatePiece(PieceType.Bishop, Player.White, false);
+            board[7, 3] = PieceFactory.CreatePiece(PieceType.Queen, Player.White, false);
+            board[7, 4] = PieceFactory.CreatePiece(PieceType.King, Player.White, false);
+            board[7, 5] = PieceFactory.CreatePiece(PieceType.Bishop, Player.White, false);
+            board[7, 6] = PieceFactory.CreatePiece(PieceType.Knight, Player.White, false);
+            board[7, 7] = PieceFactory.CreatePiece(PieceType.Rook, Player.White, false);
 
             for (int a = 0; a < 8; a++)
             {
-                this[1, a] = new Pawn(Player.Black); //Black pawns
-                this[6, a] = new Pawn(Player.White); //White pawns
+                board[1, a] = PieceFactory.CreatePiece(PieceType.Pawn, Player.Black, false); // Black pawns
+                board[6, a] = PieceFactory.CreatePiece(PieceType.Pawn, Player.White, false); // White pawns
             }
-        }
 
-        public static Board LoadedBoard(string filePath)
-        {
-            string stateStringText = File.ReadAllText(filePath);
-            Board board = new Board();
-            board.LoadPieces(stateStringText);
             return board;
         }
 
-        private void LoadPieces(string stateString)
+
+        public static Board LoadedBoard(string filePath)
         {
-            // Split the state string into its components
+            string stateString = File.ReadAllText(filePath);
             string[] parts = stateString.Split(' ');
 
-            // Load the piece positions (1st part)
+            Board board = new Board();
+
+            // Load the piece positions
             string[] rows = parts[0].Split('/');
             for (int row = 0; row < 8; row++)
             {
@@ -116,28 +106,58 @@ namespace ChessRules
                             i++; // Skip the '+'
                         }
 
-                        Player color = char.IsUpper(c) ? Player.White : Player.Black;
+                        Player color = Player.Black;
+                        if (char.IsUpper(c))
+                        {
+                            color = Player.White;
+                        }
                         PieceType pieceType = PieceFactory.GetPieceType(c);
                         // Create the piece with the hasMoved flag
                         Piece piece = PieceFactory.CreatePiece(pieceType, color, hasMoved);
                         // Assign the piece to the board
-                        this[row, col] = piece;
+                        board[row, col] = piece;
                         col++;
                     }
                 }
             }
+
+            // Load en passant information if available
+            if (parts.Length > 3)
+            {
+                string enPassantSquare = parts[3];
+                if (enPassantSquare != "-")
+                {
+                    int row = enPassantSquare[1] - '1';
+                    int col = enPassantSquare[0] - 'a';
+                    Positions enPassantPos = new Positions(row, col);
+
+                    if (row == 2) // White's skipped square (rank 3)
+                    {
+                        board.SetPawnSkippedSquares(Player.White, enPassantPos);
+                    }
+                    else if (row == 5) // Black's skipped square (rank 6)
+                    {
+                        board.SetPawnSkippedSquares(Player.Black, enPassantPos);
+                    }
+                }
+            }
+
+            return board;
         }
 
+        //if that position is inside the board
         public static bool Inside(Positions pos)
         {
             return pos.Row >= 0 && pos.Row < 8 && pos.Column >= 0 && pos.Column < 8;
         }
 
+        //If that position if empty square
         public bool Empty(Positions pos)
         {
             return this[pos] == null;
         }
 
+        //All positions of all colors
         public IEnumerable<Positions> PiecesPos()
         {
             for (int a = 0; a < 8; a++)
@@ -245,26 +265,6 @@ namespace ChessRules
         }
 
         //Check if there is a pawn in the position and if its legal
-        private bool HasPawn(Player p, Positions[] pawnPos, Positions skippedPos)
-        {
-            foreach (Positions pos in  pawnPos.Where(Inside))
-            {
-                Piece piece = this[pos];
-                if (piece == null || piece.Color != p || piece.Type != PieceType.Pawn)
-                {
-                    continue;
-                }
-
-                EnPassant move = new EnPassant(pos, skippedPos);
-                if (move.IsLegal(this))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        //check if you can en passant
         public bool EnPassantRight(Player p)
         {
             Positions skippedPos = GetPawnSkippedSquares(p.Opponent());
@@ -289,8 +289,23 @@ namespace ChessRules
                     return false;
             }
 
-            return HasPawn(p, pawnPos, skippedPos);
+            foreach (Positions pos in pawnPos.Where(Inside))
+            {
+                Piece piece = this[pos];
+                if (piece == null || piece.Color != p || piece.Type != PieceType.Pawn)
+                {
+                    continue;
+                }
+
+                EnPassant move = new EnPassant(pos, skippedPos);
+                if (move.IsLegal(this))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
+
 
     }
 }

@@ -24,6 +24,7 @@ namespace ChessRules
             stateString = new StateString(CurrentTurn, board).ToString();
         }
 
+        //Legal moves for a clicked piece
         public IEnumerable<Move> LegalMoves(Positions pos)
         {   
             //If position clicked is empty square or opponent's piece, dont return any moves
@@ -57,7 +58,7 @@ namespace ChessRules
             CheckEnded();
         }
 
-        //Get all moves of all pieces of current player to check checkmate or stalemate
+        //Get all legal moves of all pieces of current player to check checkmate or stalemate
         public IEnumerable<Move> AllLegalMoves(Player p)
         {
             List<Move> allLegalMoves = new List<Move>();

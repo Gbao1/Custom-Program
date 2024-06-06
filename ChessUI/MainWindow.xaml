@@ -10,36 +10,39 @@
         WindowStartupLocation="CenterScreen"
         Background="Black"
         KeyDown="Window_KeyDown">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+    <Viewbox>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
         
-        <ContentControl x:Name="MainMenuContainer"/>
-        
-        <Grid x:Name="BoardGrid"
-              Visibility="Collapsed"
-              Width="600"
-              Height="600"
-              MouseDown="BoardGrid_MouseDown">
-            <Grid.Background>
-                <ImageBrush ImageSource="Images/Board.png"></ImageBrush>
-            </Grid.Background>
+            <ContentControl x:Name="MainMenuContainer"/>
 
-            <UniformGrid x:Name="HighlightGrid"
-                         Rows="8"
-                         Columns="8">
-            </UniformGrid>
-            
-            <UniformGrid x:Name="PieceGrid"
-                         Rows="8"
-                         Columns="8"
-                         RenderOptions.BitmapScalingMode="HighQuality">
-            </UniformGrid>
+            <Grid x:Name="BoardGrid"
+                  Visibility="Collapsed"
+                  Width="600"
+                  Height="600"
+                  MouseDown="BoardGrid_MouseDown">
+                <Grid.Background>
+                    <ImageBrush ImageSource="Images/Board.png"></ImageBrush>
+                </Grid.Background>
 
-            <ContentControl x:Name="MenuBox"/>
+                <UniformGrid x:Name="HighlightGrid"
+                             Rows="8"
+                             Columns="8">
+                </UniformGrid>
+
+                <UniformGrid x:Name="PieceGrid"
+                             Rows="8"
+                             Columns="8"
+                             RenderOptions.BitmapScalingMode="HighQuality">
+                </UniformGrid>
+
+                <ContentControl x:Name="MenuBox"/>
+            </Grid>
         </Grid>
-    </Grid>    
+    </Viewbox>
+        
     
 </Window>

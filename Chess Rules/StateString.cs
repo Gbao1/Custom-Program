@@ -124,7 +124,14 @@ namespace ChessRules
 
         private void AddCurrentTurn(Player currentTurn)
         {
-            sb.Append(currentTurn == Player.White ? 'w' : 'b');
+            if (currentTurn == Player.White)
+            {
+                sb.Append('w');
+            }
+            else if (currentTurn == Player.Black)
+            {
+                sb.Append('b');
+            }
         }
 
         private void AddCastling(Board board)

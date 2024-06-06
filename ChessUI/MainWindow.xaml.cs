@@ -121,8 +121,6 @@ namespace ChessUI
             return currentTurn;
         }
 
-
-
         private void btnQuitGame_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.Shutdown();
