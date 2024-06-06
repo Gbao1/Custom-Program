@@ -1,6 +1,6 @@
 ﻿using ChessRules;
 
-public static class PieceFactory
+public class PieceFactory
 {
     public static PieceType GetPieceType(char c)
     {
