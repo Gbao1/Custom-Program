@@ -10,18 +10,22 @@ namespace ChessRules
 {
     public abstract class Move
     {
+        //Attributes
         public abstract MoveType Type { get; }
         public abstract Positions From { get; }
         public abstract Positions To { get; }
 
-        public abstract void Excecute(Board board); //Command pattern
+
+        //Functions
+        public abstract void Execute(Board board);
 
         //Need to make this virtual because when I add castling moves, there are more conditions to check.
         public virtual bool IsLegal(Board board)
         {
+            //make a copy of board with pieces positions, move is legal if after moving the king isnt in check
             Player p = board[From].Color;
             Board copyBoard = board.Copy();
-            Excecute(copyBoard);
+            Execute(copyBoard);
             return !copyBoard.InCheck(p);
         }
     }

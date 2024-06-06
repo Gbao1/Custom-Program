@@ -10,23 +10,16 @@ namespace ChessRules
 {
     public class Positions
     {
+        //Attributes
         public int Column {  get; }
         public int Row { get; }
 
+
+        //Functions
         public Positions(int row, int column)
         {
             Column = column;
             Row = row;
-        }
-
-        public Player SquareColor()
-        {
-            if ((Row + Column) % 2 == 0)
-            {
-                return Player.White; //Light squares
-            }
-
-            return Player.Black;  //Dark squares
         }
 
         public override bool Equals(object obj)

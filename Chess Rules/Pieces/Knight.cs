@@ -9,6 +9,7 @@ namespace ChessRules
 {
     public class Knight : Piece
     {
+        //Functions
         public override PieceType Type
         {
             get { return PieceType.Knight; }
@@ -32,44 +33,31 @@ namespace ChessRules
             return copy;
         }
 
-        private static IEnumerable<Positions> PotentialLegalMoves(Positions from)
-        {
-            foreach (Direction vertDir in new Direction[] { Direction.Up, Direction.Down })
-            {
-                foreach(Direction horDir in new Direction[] {Direction.Left, Direction.Right})
-                {
-                    yield return from + 2 * vertDir + horDir;
-                    yield return from + 2 * horDir + vertDir;
-                }
-            }
-        }
-
-        private IEnumerable<Positions> ActualLegalMoves(Positions from, Board board)
-        {
-            List<Positions> legalMoves = new List<Positions>();
-
-            foreach (Positions pos in PotentialLegalMoves(from))
-            {
-                if (Board.Inside(pos) && (board.Empty(pos) || board[pos].Color != Color))
-                {
-                    legalMoves.Add(pos);
-                }
-            }
-
-            return legalMoves;
-        }
-
         public override IEnumerable<Move> GetMoves(Positions from, Board board)
         {
-            List<Move> moves = new List<Move>();
-            IEnumerable<Positions> legalPositions = ActualLegalMoves(from, board);
-
-            foreach (Positions to in legalPositions)
+            // Generate potential legal moves
+            foreach (Direction vertDir in new Direction[] { Direction.Up, Direction.Down })
             {
-                moves.Add(new Normal(from, to));
-            }
+                foreach (Direction horDir in new Direction[] { Direction.Left, Direction.Right })
+                {
+                    Positions[] potentialMoves = new Positions[]
+                    {
+                        //Create L shape move in all 4 directions (2 each so 8 potentials in total)
+                        from + 2 * vertDir + horDir,
+                        from + 2 * horDir + vertDir
+                    };
 
-            return moves;
+                    // Check each potential move to see if it's legal
+                    foreach (Positions to in potentialMoves)
+                    {
+                        if (Board.Inside(to) && (board.Empty(to) || board[to].Color != Color))
+                        {
+                            yield return new Normal(from, to);
+                        }
+                    }
+                }
+            }
         }
+
     }
 }

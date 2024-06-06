@@ -19,7 +19,8 @@ namespace ChessRules
     ///CAPITAL for White pieces
     ///lower for black pieces
     ///each row is seperate by "/"(a full string will have all 8 rows)
-    ///the number represent how many empty squares are between each pieces: Example: 4k2r means: from the top left, 4 empty squares, next square is black king, next is 2 empty squares, next square is black rook
+    ///the number represent how many empty squares are between each pieces: 
+    ///Example: 4k2r means: from the top left, 4 empty squares, next square is black king, next is 2 empty squares, next square is black rook
     ///2nd part is the current player turn: w for white and b for black
     ///3rd part is catsling rights: Q for queenside and K for king side, 
     ///again, CAPITAL is white rights and lowercase is black rights.
@@ -28,8 +29,13 @@ namespace ChessRules
     /// </summary>
     public class StateString
     {
+        //Attributes
+        //Using StringBuilder for more efficiency because it doesn't create a new string every time you modify it.
+        //Instead, it maintains a buffer where the string is stored and allows you to modify that buffer.
         private readonly StringBuilder sb = new StringBuilder();
 
+
+        //Functions
         public StateString(Player currentTurn, Board board)
         {
             AddPiecesPositions(board);
@@ -41,6 +47,7 @@ namespace ChessRules
             AddEnPassant(board, currentTurn);
         }
 
+        //Piece logic
         private static string PiecesString(Piece piece)
         {
             char c;
@@ -82,6 +89,7 @@ namespace ChessRules
             return c.ToString();
         }
 
+        //Row logic
         private void AddRow(Board board, int row)
         {
             int empty = 0;
@@ -109,6 +117,7 @@ namespace ChessRules
             }
         }
 
+        //Combine the 2 for part 1
         private void AddPiecesPositions(Board board)
         {
             for (int row = 0; row < 8; row++)
@@ -122,6 +131,7 @@ namespace ChessRules
             }
         }
 
+        //part 2 logic
         private void AddCurrentTurn(Player currentTurn)
         {
             if (currentTurn == Player.White)
@@ -134,13 +144,16 @@ namespace ChessRules
             }
         }
 
+        //part 3 logic
         private void AddCastling(Board board)
         {
+            //4 possible values
             bool WKSCastle = board.KSCastleRight(Player.White);
             bool WQSCastle = board.QSCastleRight(Player.White);
             bool BKSCastle = board.KSCastleRight(Player.Black);
             bool BQSCastle = board.QSCastleRight(Player.Black);
 
+            //if none is correct then append '-'
             if (!(WKSCastle || WQSCastle || BKSCastle || BQSCastle))
             {
                 sb.Append('-');
@@ -153,6 +166,7 @@ namespace ChessRules
             if (BQSCastle) sb.Append('q');
         }
 
+        //part 4 logic
         private void AddEnPassant(Board board, Player currentTurn)
         {
             if (!board.EnPassantRight(currentTurn))
@@ -161,6 +175,7 @@ namespace ChessRules
                 return;
             }
 
+            //convert pos to square name (file followed by rank)
             Positions pos = board.GetPawnSkippedSquares(currentTurn.Opponent());
             char file = (char)('a' + pos.Column);
             int rank = 8 - pos.Row;

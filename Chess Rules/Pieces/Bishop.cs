@@ -10,19 +10,22 @@ namespace ChessRules
 {
     public class Bishop : Piece
     {
-        public override PieceType Type
-        {
-            get { return PieceType.Bishop; }
-        }
-        public override Player Color { get; }
-
-        private static readonly Direction[] dirs = new Direction[]
+        //Attributes
+        public static readonly Direction[] dirs = new Direction[]
         {
             Direction.UpLeft,
             Direction.UpRight,
             Direction.DownLeft,
             Direction.DownRight
         };
+
+
+        //Functions
+        public override PieceType Type
+        {
+            get { return PieceType.Bishop; }
+        }
+        public override Player Color { get; }
 
         public Bishop(Player color)
         {

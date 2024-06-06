@@ -13,6 +13,7 @@ namespace ChessRules
 {
     public class Board
     {
+        //Attributes
         private readonly Piece[,] pieces = new Piece[8, 8];
 
         private readonly Dictionary<Player, Positions> pawnSkippedSquares = new Dictionary<Player, Positions>
@@ -21,18 +22,26 @@ namespace ChessRules
             { Player.Black, null }
         };
 
+        //Interger indexer (Allows accessing and setting the piece at a specific position on the board using row and column indices)
         public Piece this[int row, int col]
         {
             get { return pieces[row, col]; }
             set { pieces[row, col] = value; }
         }
 
+        //Positions indexer (Allows accessing and setting the piece at a specific position on the board using a Positions object)
         public Piece this[Positions pos]
         {
             get { return this[pos.Row, pos.Column]; }
             set { this[pos.Row, pos.Column] = value; }
         }
 
+        private Board()
+        {
+
+        }
+
+        //Get and set the pawn skipped square
         public Positions GetPawnSkippedSquares(Player player)
         {
             return pawnSkippedSquares[player];
@@ -43,6 +52,7 @@ namespace ChessRules
             pawnSkippedSquares[p] = pos;
         }
 
+        //SetUp() is called when you want a new board
         public static Board SetUp()
         {
             Board board = new Board();
@@ -75,7 +85,7 @@ namespace ChessRules
             return board;
         }
 
-
+        //Load a board from a savefile
         public static Board LoadedBoard(string filePath)
         {
             string stateString = File.ReadAllText(filePath);
@@ -84,21 +94,26 @@ namespace ChessRules
             Board board = new Board();
 
             // Load the piece positions
+            //Each row is separated by '/'
             string[] rows = parts[0].Split('/');
             for (int row = 0; row < 8; row++)
             {
+                //get row accordingly
                 string rowString = rows[row];
                 int col = 0;
                 for (int i = 0; i < rowString.Length; i++)
                 {
+                    //go by each row
                     char c = rowString[i];
 
+                    //if char is a digit then skip that many squares
                     if (char.IsDigit(c))
                     {
                         col += int.Parse(c.ToString());
                     }
                     else
                     {
+                        //if the char has '+' behind that means it has moved
                         bool hasMoved = false;
                         if (i + 1 < rowString.Length && rowString[i + 1] == '+')
                         {
@@ -106,6 +121,7 @@ namespace ChessRules
                             i++; // Skip the '+'
                         }
 
+                        //If uppercase -> white pieces
                         Player color = Player.Black;
                         if (char.IsUpper(c))
                         {
@@ -183,9 +199,10 @@ namespace ChessRules
             }
         }
 
+        //if a player's king is in check
         public bool InCheck(Player p)
         {
-            //Get opponent pieces
+            //Get opponent pieces, if any pieces of them can capture the king -> are in check
             foreach (Positions pos in PiecePosColor(p.Opponent()))
             {
                 Piece piece = this[pos];
@@ -225,6 +242,7 @@ namespace ChessRules
             return copy;
         }
 
+        //Check if king and rook is not moved
         private bool HasKingAndRookMoved(Positions kingPos, Positions rookPos)
         {
             if (Empty(rookPos) || Empty(kingPos))
@@ -238,6 +256,7 @@ namespace ChessRules
             return king.Type == PieceType.King && rook.Type == PieceType.Rook && !king.HasMoved && !rook.HasMoved;
         }
 
+        //Check if can castle king side
         public bool KSCastleRight(Player p)
         {
             switch (p)
@@ -251,6 +270,7 @@ namespace ChessRules
             }
         }
 
+        //Check if can castle queen side
         public bool QSCastleRight(Player p)
         {
             switch (p)

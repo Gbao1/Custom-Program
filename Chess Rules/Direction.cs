@@ -10,13 +10,13 @@ namespace ChessRules
 {
     public class Direction
     {
-
+        //Attributes
         public readonly static Direction Up = new Direction(-1, 0);
         public readonly static Direction Down = new Direction(1, 0);
         public readonly static Direction Right = new Direction(0, 1);
         public readonly static Direction Left = new Direction(0, -1);
 
-        public readonly static Direction UpLeft =  Up + Left;
+        public readonly static Direction UpLeft = Up + Left;
         public readonly static Direction UpRight = Up + Right;
         public readonly static Direction DownLeft = Down + Left;
         public readonly static Direction DownRight = Down + Right;
@@ -24,6 +24,8 @@ namespace ChessRules
         public int RowDir { get; }
         public int ColumnDir { get; }
 
+
+        //Functions
         public Direction(int rowDir, int columnDir)
         {
             RowDir = rowDir;

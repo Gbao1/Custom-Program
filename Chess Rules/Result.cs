@@ -8,9 +8,12 @@ namespace ChessRules
 {
     public class Result
     {
+        //Attributes
         public Player Winner { get; }
         public EndCase Reason { get; }
 
+
+        //Functions
         public Result(Player winner, EndCase reason)
         {
             Winner = winner;

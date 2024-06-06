@@ -11,12 +11,15 @@ namespace ChessRules
 {
     public class GameState
     {
+        //Attributes
         public Board Board { get; }
         public Player CurrentTurn { get; private set; } //mutable in class but read-only outside
         public Result Result { get; private set; } = null; //mutable in class but read-only outside
 
         private string stateString;
 
+
+        //Functions
         public GameState(Player player,  Board board)
         {
             CurrentTurn = player;
@@ -50,12 +53,13 @@ namespace ChessRules
             return legalMoves;
         }
 
+        //Move the piece
         public void Moving(Move move)
         {
             Board.SetPawnSkippedSquares(CurrentTurn, null);
-            move.Excecute(Board);
+            move.Execute(Board);
             CurrentTurn = CurrentTurn.Opponent(); //change turn
-            StateStringUpdate();
+            stateString = new StateString(CurrentTurn, Board).ToString(); //update stateString
             CheckEnded();
         }
 
@@ -81,6 +85,7 @@ namespace ChessRules
             return allLegalMoves;
         }
 
+        //Check if game has ended with the result and reason
         private void CheckEnded()
         {
             if (!AllLegalMoves(CurrentTurn).Any())
@@ -96,16 +101,7 @@ namespace ChessRules
             }
         }
 
-        public bool IsEnded()
-        {
-            return Result != null;
-        }
-
-        private void StateStringUpdate()
-        {
-            stateString = new StateString(CurrentTurn, Board).ToString();
-        }
-
+        //Save the current stateString to a savefile
         public void Save(string filename)
         {
             StreamWriter writer = new StreamWriter(filename);

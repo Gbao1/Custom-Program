@@ -9,12 +9,15 @@ using System.Threading.Tasks;
 namespace ChessRules
 {
     public class EnPassant : Move
-    {
+    {      
+        //Attributes
+        private readonly Positions captureSquare;
+
+
+        //Functions
         public override MoveType Type { get; }
         public override Positions From { get; }
         public override Positions To { get; }
-
-        private readonly Positions captureSquare;
 
         public EnPassant(Positions from, Positions to)
         {
@@ -23,9 +26,10 @@ namespace ChessRules
             captureSquare = new Positions(from.Row, to.Column);
         }
 
-        public override void Excecute(Board board)
+        //move the pawn and set capture square to null
+        public override void Execute(Board board)
         {
-            new Normal(From, To).Excecute(board);
+            new Normal(From, To).Execute(board);
             board[captureSquare] = null;
         }
     }

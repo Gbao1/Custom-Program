@@ -10,11 +10,14 @@ namespace ChessRules
 {
     public class DoublePawn : Move
     {
+        //Attributes
+        private readonly Positions skippedSquare;
+
+
+        //Functions
         public override MoveType Type { get; }
         public override Positions From { get; }
         public override Positions To { get; }
-
-        private readonly Positions skippedSquare;
 
         public DoublePawn(Positions from, Positions to)
         {
@@ -23,11 +26,12 @@ namespace ChessRules
             skippedSquare = new Positions((from.Row + to.Row) / 2, from.Column);
         }
 
-        public override void Excecute(Board board)
+        //move the pawn and store the skipped square
+        public override void Execute(Board board)
         {
             Player p = board[From].Color;
             board.SetPawnSkippedSquares(p, skippedSquare);
-            new Normal(From, To).Excecute(board);
+            new Normal(From, To).Execute(board);
         }
     }
 }

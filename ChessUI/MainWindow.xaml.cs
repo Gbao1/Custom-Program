@@ -20,16 +20,22 @@ namespace ChessUI
     /// </summary>
     public partial class MainWindow : Window
     {
+        //Attributes
         private readonly Image[,] pieceImages = new Image[8, 8];
         private readonly Rectangle[,] highlights = new Rectangle[8, 8]; //highlights the legal moves
         private readonly Dictionary<Positions, Move> moveStore = new Dictionary<Positions, Move>(); //store all the legal moves of the piece
-        private static string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-        private static string SaveFilePath = System.IO.Path.Combine(desktopPath, "saved_game.txt");
+
+        //I want to have a single, shared save file path across all instances of MainWindow -> static
+        private static string SaveFilePath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "saved_game.txt");
 
         private GameState gameState;
         private Positions selected = null; //store the selected position
         private Positions promoFrom;
         private Positions promoTo;
+
+
+        //Functions
+
         /// <summary>
         /// How the piece moves: when player click the piece, store selected position in 'selected'
         /// then ask the GameState what are the legal moves of the piece (stored in moveStore using [x, y] as the key)
@@ -66,32 +72,40 @@ namespace ChessUI
 
         private void btnNewGame_Click(object sender, RoutedEventArgs e)
         {
-            InitializedBoard();
-
-            gameState = new GameState(Player.White, Board.SetUp());
-            Draw(gameState.Board);
-
-            MainMenuContainer.Content = null; // Clear the MainMenuContainer
-            BoardGrid.Visibility = Visibility.Visible; // Show the chessboard grid
+            InitializeGameState(true);
         }
 
         private void btnLoadGame_Click(object sender, RoutedEventArgs e)
         {
+            InitializeGameState(false);
+        }
+
+        private void InitializeGameState(bool isNewGame)
+        {
             InitializedBoard();
 
-            if (File.Exists(SaveFilePath))
+            if (isNewGame)
             {
-                Board loadedBoard = Board.LoadedBoard(SaveFilePath);
-                Player currentTurn = GetCurrentTurn(loadedBoard);
-                gameState = new GameState(currentTurn, loadedBoard);
+                gameState = new GameState(Player.White, Board.SetUp());
                 Draw(gameState.Board);
-                MainMenuContainer.Content = null;
-                BoardGrid.Visibility = Visibility.Visible;
             }
             else
             {
-                MessageBox.Show("Save file not found.");
+                if (File.Exists(SaveFilePath))
+                {
+                    Board loadedBoard = Board.LoadedBoard(SaveFilePath);
+                    Player currentTurn = GetCurrentTurn(loadedBoard);
+                    gameState = new GameState(currentTurn, loadedBoard);
+                    Draw(gameState.Board);
+                }
+                else
+                {
+                    MessageBox.Show("Save file not found.");
+                }
             }
+
+            MainMenuContainer.Content = null;
+            BoardGrid.Visibility = Visibility.Visible;
         }
 
         private Player GetCurrentTurn(Board board)
@@ -198,6 +212,7 @@ namespace ChessUI
             }
         }
 
+        //The destination pos
         private void SelectedTo(Positions pos)
         {
             selected = null;
@@ -205,12 +220,14 @@ namespace ChessUI
 
             if (moveStore.TryGetValue(pos, out Move move))
             {
+                //if its a promotion move
                 if (move.Type == MoveType.PawnPromotion)
                 {   
                     promoFrom = move.From;
                     promoTo = move.To;
                     HandlePromotionMoves(promoFrom, promoTo);
                 }
+                //else normal move
                 else
                 {
                     HandleMoves(move);
@@ -218,6 +235,7 @@ namespace ChessUI
             }
         }
 
+        //Handle promotion moves
         private void HandlePromotionMoves(Positions from, Positions to)
         {
             // Show the pawn at to position as a step between promoting
@@ -239,18 +257,22 @@ namespace ChessUI
             HandleMoves(promoMove);
         }
 
-
+        //Handle normal moves
         private void HandleMoves(Move move)
         {
             gameState.Moving(move);
             Draw(gameState.Board);
 
-            if (gameState.IsEnded())
+            if (gameState.Result != null)
             {
-                ShowMenu();
+                //Show the end menu
+                EndMenu menu = new EndMenu(gameState);
+                MenuBox.Content = menu;
+                menu.OptionsChanged += OnOptionsChanged; //subscribe to the Event
             }
         }
 
+        //Storing legal moves in the moveStore dictionary.
         private void StoredMoves(IEnumerable<Move> moves)
         {
             moveStore.Clear();
@@ -261,6 +283,7 @@ namespace ChessUI
             }
         }
 
+        //Highlighting squares on the board to indicate legal move destinations.
         private void Highlighting()
         {
             Color color = Color.FromArgb(150, 125, 255, 125);
@@ -290,7 +313,11 @@ namespace ChessUI
             if (option == Options.Restart)
             {
                 MenuBox.Content = null;
-                GameRestart();
+                //Restart the game
+                UnHighlighting();
+                moveStore.Clear();
+                gameState = new GameState(Player.White, Board.SetUp());
+                Draw(gameState.Board);
             }
             else if (option == Options.Quit)
             {
@@ -307,35 +334,16 @@ namespace ChessUI
             }
         }
 
-        private void ShowMenu()
-        {
-            EndMenu menu = new EndMenu(gameState);
-            MenuBox.Content = menu;
-            menu.OptionsChanged += OnOptionsChanged; //subscribe to the Event
-        }
-
-
-        private void GameRestart()
-        {
-            UnHighlighting();
-            moveStore.Clear();
-            gameState = new GameState(Player.White, Board.SetUp());
-            Draw(gameState.Board);
-        }
-
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             if (!IsMenuOn() && e.Key == Key.Escape)
             {
-                ShowPauseMenu();
+                //Show pause menu
+                PauseMenu pauseMenu = new PauseMenu();
+                MenuBox.Content = pauseMenu;
+                pauseMenu.OptionsChanged += OnOptionsChanged;
             }
         }
 
-        private void ShowPauseMenu()
-        {
-            PauseMenu pauseMenu = new PauseMenu();
-            MenuBox.Content = pauseMenu;
-            pauseMenu.OptionsChanged += OnOptionsChanged;
-        }
     }
 }

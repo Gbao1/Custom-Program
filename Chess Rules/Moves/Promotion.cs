@@ -10,12 +10,15 @@ namespace ChessRules
 {
     public class Promotion : Move
     {
+        //Attribute
+        private readonly PieceType promotedType;
+
+
+        //Functions
         public override MoveType Type { get { return MoveType.PawnPromotion; } }
 
         public override Positions From { get; }
         public override Positions To { get; }
-
-        private readonly PieceType promotedType;
 
         public Promotion(Positions from, Positions to, PieceType promotedType)
         {
@@ -24,28 +27,14 @@ namespace ChessRules
             this.promotedType = promotedType;
         }
 
-        private Piece PromotionPieces(Player color)
-        {
-            switch(promotedType)
-            {
-                case PieceType.Rook:
-                    return new Rook(color);
-                case PieceType.Knight:
-                    return new Knight(color);
-                case PieceType.Bishop:
-                    return new Bishop(color);
-                default:
-                    return new Queen(color);
-            }
-        }
-
-        public override void Excecute(Board board)
+        //move the pawn, set the pawn to whatever been promoted to
+        public override void Execute(Board board)
         {
             Piece pawn = board[From];
             board[From] = null;
 
-            Piece promoted = PromotionPieces(pawn.Color);
-            promoted.HasMoved = true;
+            //ensure promoted piece is the same color as the pawn
+            Piece promoted = PieceFactory.CreatePiece(promotedType, pawn.Color, true);
             board[To] = promoted;
         }
     }

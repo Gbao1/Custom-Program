@@ -10,13 +10,8 @@ namespace ChessRules
 {
     public class Queen : Piece
     {
-        public override PieceType Type
-        {
-            get { return PieceType.Queen; }
-        }
-        public override Player Color { get; }
-
-        private static readonly Direction[] dirs = new Direction[]
+        //Attributes
+        public static readonly Direction[] dirs = new Direction[]
         {
             Direction.Up,
             Direction.Right,
@@ -27,6 +22,14 @@ namespace ChessRules
             Direction.DownLeft,
             Direction.DownRight
         };
+
+
+        //Functions
+        public override PieceType Type
+        {
+            get { return PieceType.Queen; }
+        }
+        public override Player Color { get; }
 
         public Queen(Player color)
         {

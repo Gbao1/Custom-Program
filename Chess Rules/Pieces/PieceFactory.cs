@@ -2,6 +2,7 @@
 
 public class PieceFactory
 {
+    //Get the pieceType, mainly for from stateString
     public static PieceType GetPieceType(char c)
     {
         PieceType pieceType;
@@ -33,6 +34,7 @@ public class PieceFactory
         return pieceType;
     }
 
+    //Create the piece
     public static Piece CreatePiece(PieceType pieceType, Player color, bool hasMoved)
     {
         Piece piece;

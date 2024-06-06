@@ -10,13 +10,8 @@ namespace ChessRules
 {
     public class King : Piece
     {
-        public override PieceType Type
-        {
-            get { return PieceType.King; }
-        }
-        public override Player Color { get; }
-
-        private readonly static Direction[] dirs = new Direction[]
+        //Attributes
+        public readonly static Direction[] dirs = new Direction[]
         {
             Direction.Up,
             Direction.Right,
@@ -28,6 +23,14 @@ namespace ChessRules
             Direction.DownRight
         };
 
+
+        //Functions
+        public override PieceType Type
+        {
+            get { return PieceType.King; }
+        }
+        public override Player Color { get; }
+
         public King(Player color)
         {
             Color = color;
@@ -38,6 +41,7 @@ namespace ChessRules
             HasMoved = true;
         }
 
+        //Check if rook has moved
         private static bool HasRookMoved(Positions pos, Board board)
         {
             if (board.Empty(pos))
@@ -49,6 +53,7 @@ namespace ChessRules
             return piece.Type == PieceType.Rook && !piece.HasMoved;
         }
 
+        //Check if all squares are empty
         private static bool AllEmpty(IEnumerable<Positions> positions, Board board)
         {
             foreach (Positions pos in positions)
@@ -61,6 +66,7 @@ namespace ChessRules
             return true;
         }
 
+        //check if can castle king side
         private bool CanKSCastle(Positions from, Board board)
         {
             if (HasMoved)
@@ -71,9 +77,10 @@ namespace ChessRules
             Positions rookPos = new Positions(from.Row, 7);
             Positions[] squareBtw = new Positions[] { new(from.Row, 5), new(from.Row, 6) };
 
-            return HasRookMoved(rookPos, board) && AllEmpty(squareBtw, board);
+            return HasRookMoved(rookPos, board) && AllEmpty(squareBtw, board); //true if no piece between and rook not moved
         }
 
+        //check if can castle queen side
         private bool CanQSCastle(Positions from, Board board)
         {
             if (HasMoved)
@@ -84,7 +91,7 @@ namespace ChessRules
             Positions rookPos = new Positions(from.Row, 0);
             Positions[] squareBtw = new Positions[] { new(from.Row, 1), new(from.Row, 2), new(from.Row, 3) };
 
-            return HasRookMoved(rookPos, board) && AllEmpty(squareBtw, board);
+            return HasRookMoved(rookPos, board) && AllEmpty(squareBtw, board); //true if no piece between and rook not moved
         }
 
         public override Piece Copy()

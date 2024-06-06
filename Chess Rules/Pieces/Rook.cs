@@ -10,19 +10,22 @@ namespace ChessRules
 {
     public class Rook : Piece
     {
-        public override PieceType Type
-        {
-            get { return PieceType.Rook; }
-        }
-        public override Player Color { get; }
-
-        private static readonly Direction[] dirs = new Direction[]
+        //Attributes
+        public static readonly Direction[] dirs = new Direction[]
         {
             Direction.Up,
             Direction.Right,
             Direction.Left,
             Direction.Down
         };
+
+
+        //Functions
+        public override PieceType Type
+        {
+            get { return PieceType.Rook; }
+        }
+        public override Player Color { get; }
 
         public Rook(Player color)
         {
