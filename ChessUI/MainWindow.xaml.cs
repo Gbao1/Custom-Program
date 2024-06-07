@@ -45,13 +45,11 @@ namespace ChessUI
         public MainWindow()
         {
             InitializeComponent();
-
+            
             MainMenu mainMenuControl = new MainMenu();
 
             // Check if the save file exists
-            bool saveFileExists = File.Exists(SaveFilePath);
-
-            if (saveFileExists)
+            if (File.Exists(SaveFilePath))
             {
                 mainMenuControl.btnLoadGame.Visibility = Visibility.Visible;
             }
@@ -63,7 +61,7 @@ namespace ChessUI
             // Add the MainMenuUserControl to the MainMenuContainer
             MainMenuContainer.Content = mainMenuControl;
 
-            // Wire up the button events to your existing event handlers
+            // Wire up the button events to existing event handlers
             mainMenuControl.btnNewGame.Click += btnNewGame_Click;
             mainMenuControl.btnLoadGame.Click += btnLoadGame_Click;
             mainMenuControl.btnQuitGame.Click += btnQuitGame_Click;
@@ -88,6 +86,7 @@ namespace ChessUI
             {
                 gameState = new GameState(Player.White, Board.SetUp());
                 Draw(gameState.Board);
+                CurrentTurnText.Text = $"Current Turn: {gameState.CurrentTurn}";
             }
             else
             {
@@ -97,6 +96,7 @@ namespace ChessUI
                     Player currentTurn = GetCurrentTurn(loadedBoard);
                     gameState = new GameState(currentTurn, loadedBoard);
                     Draw(gameState.Board);
+                    CurrentTurnText.Text = $"Current Turn: {gameState.CurrentTurn}";
                 }
                 else
                 {
@@ -262,7 +262,9 @@ namespace ChessUI
         {
             gameState.Moving(move);
             Draw(gameState.Board);
+            CurrentTurnText.Text = $"Current Turn: {gameState.CurrentTurn}";
 
+            //Check for end game
             if (gameState.Result != null)
             {
                 //Show the end menu

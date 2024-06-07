@@ -32,8 +32,8 @@ namespace ChessRules
             ColumnDir = columnDir;
         }
 
-        //add two Direction objects together
-        public static Direction operator +(Direction dir1, Direction dir2)
+        //We need to create a custom + operator to correctly identify the diagnal direction
+        public static Direction operator+(Direction dir1, Direction dir2)
         {
             return new Direction(dir1.RowDir + dir2.RowDir, dir1.ColumnDir + dir2.ColumnDir);
         }

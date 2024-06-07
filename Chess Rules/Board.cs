@@ -14,6 +14,8 @@ namespace ChessRules
     public class Board
     {
         //Attributes
+        private static Board _board;
+
         private readonly Piece[,] pieces = new Piece[8, 8];
 
         private readonly Dictionary<Player, Positions> pawnSkippedSquares = new Dictionary<Player, Positions>
@@ -22,7 +24,10 @@ namespace ChessRules
             { Player.Black, null }
         };
 
-        //Interger indexer (Allows accessing and setting the piece at a specific position on the board using row and column indices)
+
+        //Functions
+
+        //Integer indexer (Allows accessing and setting the piece at a specific position on the board using row and column indices)
         public Piece this[int row, int col]
         {
             get { return pieces[row, col]; }
@@ -55,34 +60,38 @@ namespace ChessRules
         //SetUp() is called when you want a new board
         public static Board SetUp()
         {
-            Board board = new Board();
+            if (_board == null)
+            {
+                _board = new Board();
+            }
+            
             // Black pieces first row
-            board[0, 0] = PieceFactory.CreatePiece(PieceType.Rook, Player.Black, false);
-            board[0, 1] = PieceFactory.CreatePiece(PieceType.Knight, Player.Black, false);
-            board[0, 2] = PieceFactory.CreatePiece(PieceType.Bishop, Player.Black, false);
-            board[0, 3] = PieceFactory.CreatePiece(PieceType.Queen, Player.Black, false);
-            board[0, 4] = PieceFactory.CreatePiece(PieceType.King, Player.Black, false);
-            board[0, 5] = PieceFactory.CreatePiece(PieceType.Bishop, Player.Black, false);
-            board[0, 6] = PieceFactory.CreatePiece(PieceType.Knight, Player.Black, false);
-            board[0, 7] = PieceFactory.CreatePiece(PieceType.Rook, Player.Black, false);
+            _board[0, 0] = PieceFactory.CreatePiece(PieceType.Rook, Player.Black, false);
+            _board[0, 1] = PieceFactory.CreatePiece(PieceType.Knight, Player.Black, false);
+            _board[0, 2] = PieceFactory.CreatePiece(PieceType.Bishop, Player.Black, false);
+            _board[0, 3] = PieceFactory.CreatePiece(PieceType.Queen, Player.Black, false);
+            _board[0, 4] = PieceFactory.CreatePiece(PieceType.King, Player.Black, false);
+            _board[0, 5] = PieceFactory.CreatePiece(PieceType.Bishop, Player.Black, false);
+            _board[0, 6] = PieceFactory.CreatePiece(PieceType.Knight, Player.Black, false);
+            _board[0, 7] = PieceFactory.CreatePiece(PieceType.Rook, Player.Black, false);
 
             // White pieces first row
-            board[7, 0] = PieceFactory.CreatePiece(PieceType.Rook, Player.White, false);
-            board[7, 1] = PieceFactory.CreatePiece(PieceType.Knight, Player.White, false);
-            board[7, 2] = PieceFactory.CreatePiece(PieceType.Bishop, Player.White, false);
-            board[7, 3] = PieceFactory.CreatePiece(PieceType.Queen, Player.White, false);
-            board[7, 4] = PieceFactory.CreatePiece(PieceType.King, Player.White, false);
-            board[7, 5] = PieceFactory.CreatePiece(PieceType.Bishop, Player.White, false);
-            board[7, 6] = PieceFactory.CreatePiece(PieceType.Knight, Player.White, false);
-            board[7, 7] = PieceFactory.CreatePiece(PieceType.Rook, Player.White, false);
+            _board[7, 0] = PieceFactory.CreatePiece(PieceType.Rook, Player.White, false);
+            _board[7, 1] = PieceFactory.CreatePiece(PieceType.Knight, Player.White, false);
+            _board[7, 2] = PieceFactory.CreatePiece(PieceType.Bishop, Player.White, false);
+            _board[7, 3] = PieceFactory.CreatePiece(PieceType.Queen, Player.White, false);
+            _board[7, 4] = PieceFactory.CreatePiece(PieceType.King, Player.White, false);
+            _board[7, 5] = PieceFactory.CreatePiece(PieceType.Bishop, Player.White, false);
+            _board[7, 6] = PieceFactory.CreatePiece(PieceType.Knight, Player.White, false);
+            _board[7, 7] = PieceFactory.CreatePiece(PieceType.Rook, Player.White, false);
 
             for (int a = 0; a < 8; a++)
             {
-                board[1, a] = PieceFactory.CreatePiece(PieceType.Pawn, Player.Black, false); // Black pawns
-                board[6, a] = PieceFactory.CreatePiece(PieceType.Pawn, Player.White, false); // White pawns
+                _board[1, a] = PieceFactory.CreatePiece(PieceType.Pawn, Player.Black, false); // Black pawns
+                _board[6, a] = PieceFactory.CreatePiece(PieceType.Pawn, Player.White, false); // White pawns
             }
 
-            return board;
+            return  _board;
         }
 
         //Load a board from a savefile
@@ -91,7 +100,10 @@ namespace ChessRules
             string stateString = File.ReadAllText(filePath);
             string[] parts = stateString.Split(' ');
 
-            Board board = new Board();
+            if (_board == null)
+            {
+                _board = new Board();
+            }
 
             // Load the piece positions
             //Each row is separated by '/'
@@ -131,7 +143,7 @@ namespace ChessRules
                         // Create the piece with the hasMoved flag
                         Piece piece = PieceFactory.CreatePiece(pieceType, color, hasMoved);
                         // Assign the piece to the board
-                        board[row, col] = piece;
+                        _board[row, col] = piece;
                         col++;
                     }
                 }
@@ -149,16 +161,16 @@ namespace ChessRules
 
                     if (row == 2) // White's skipped square (rank 3)
                     {
-                        board.SetPawnSkippedSquares(Player.White, enPassantPos);
+                        _board.SetPawnSkippedSquares(Player.White, enPassantPos);
                     }
                     else if (row == 5) // Black's skipped square (rank 6)
                     {
-                        board.SetPawnSkippedSquares(Player.Black, enPassantPos);
+                        _board.SetPawnSkippedSquares(Player.Black, enPassantPos);
                     }
                 }
             }
 
-            return board;
+            return _board;
         }
 
         //if that position is inside the board

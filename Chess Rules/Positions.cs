@@ -46,6 +46,7 @@ namespace ChessRules
         }
 
         // checks if two Positions objects are not equal
+        //The operator == requires a matching operator to be defined
         public static bool operator !=(Positions left, Positions right)
         {
             return !(left == right);

@@ -13,16 +13,22 @@
     <Viewbox>
         <Grid>
             <Grid.RowDefinitions>
+                <RowDefinition Height="0.2*" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
         
             <ContentControl x:Name="MainMenuContainer"/>
 
+            <TextBlock x:Name="CurrentTurnText"
+                       Style="{StaticResource TextStyle}"
+                       Margin="0, 5, 0, 10"/>
+
             <Grid x:Name="BoardGrid"
                   Visibility="Collapsed"
                   Width="600"
                   Height="600"
+                  Grid.Row="2"
                   MouseDown="BoardGrid_MouseDown">
                 <Grid.Background>
                     <ImageBrush ImageSource="Images/Board.png"></ImageBrush>
